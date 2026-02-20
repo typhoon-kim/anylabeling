@@ -61,9 +61,11 @@
         <file>images/zoom-in.png</file>
         <file>images/zoom-out.png</file>
         <file>images/zoom.png</file>
+        <file>images/kr.png</file>
     </qresource>
     <qresource prefix="/languages">
         <file>translations/en_US.qm</file>
+        <file>translations/ko_KR.qm</file>
         <file>translations/vi_VN.qm</file>
         <file>translations/zh_CN.qm</file>
     </qresource>

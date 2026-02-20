@@ -42,7 +42,8 @@ from anylabeling.views.labeling.widgets import (
 from .widgets.export_dialog import ExportDialog
 from anylabeling.styles import AppTheme
 
-LABEL_COLORMAP = imgviz.label_colormap()
+LABEL_COLORMAP = imgviz.label_colormap().copy()
+LABEL_COLORMAP.setflags(write=1)
 
 # Green for the first label
 LABEL_COLORMAP[2] = LABEL_COLORMAP[1]
@@ -684,6 +685,14 @@ class LabelingWidget(LabelDialog):
             checked=self._config["language"] == "zh_CN",
             enabled=True,  # Always enable all language options
         )
+        select_lang_ko = create_action(
+            "한국어",
+            functools.partial(self.set_language, "ko_KR"),
+            icon="kr",
+            checkable=True,
+            checked=self._config["language"] == "ko_KR",
+            enabled=True,  # Always enable all language options
+        )
 
         # Create action group for language actions to make them mutually exclusive
         lang_action_group = QtWidgets.QActionGroup(self)
@@ -691,9 +700,15 @@ class LabelingWidget(LabelDialog):
         lang_action_group.addAction(select_lang_en)
         lang_action_group.addAction(select_lang_vi)
         lang_action_group.addAction(select_lang_zh)
+        lang_action_group.addAction(select_lang_ko)
 
         # Store language actions for later use
-        lang_actions = (select_lang_en, select_lang_vi, select_lang_zh)
+        lang_actions = (
+            select_lang_en,
+            select_lang_vi,
+            select_lang_zh,
+            select_lang_ko,
+        )
 
         # Theme selector
         current_theme = self._config.get("theme", "system")
@@ -1251,11 +1266,13 @@ class LabelingWidget(LabelDialog):
         text_next = self.tr("Next:")
         text_rectangle = self.tr("Rectangle:")
         text_polygon = self.tr("Polygon:")
+        text_edit = self.tr("Edit:")
         return (
             f"<b>{text_mode}</b> {self.canvas.get_mode()} - <b>{text_shortcuts}</b>"
             f" {text_previous} <b>A</b>, {text_next} <b>D</b>,"
             f" {text_rectangle} <b>R</b>,"
-            f" {text_polygon} <b>P</b>"
+            f" {text_polygon} <b>P</b>,"
+            f" {text_edit} <b>E</b>"
         )
 
     @pyqtSlot()
@@ -2172,6 +2189,13 @@ class LabelingWidget(LabelDialog):
                 self.set_scroll(
                     orientation, self.scroll_values[orientation][self.filename]
                 )
+            elif self._config["keep_prev_scale"] and self.recent_files:
+                # If keep_prev_scale is ON, copy scroll values from previous file
+                prev_file = self.recent_files[0]
+                if prev_file in self.scroll_values[orientation]:
+                    self.set_scroll(
+                        orientation, self.scroll_values[orientation][prev_file]
+                    )
         # set brightness contrast values
         dialog = BrightnessContrastDialog(
             utils.img_data_to_pil(self.image_data),

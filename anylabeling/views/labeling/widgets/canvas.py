@@ -856,7 +856,7 @@ class Canvas(QtWidgets.QWidget):  # pylint: disable=too-many-public-methods, too
         # Draw mouse coordinates
         if self.show_cross_line:
             pen = QtGui.QPen(
-                QtGui.QColor("#00FF00"),
+                QtGui.QColor("#FFFFFF"),
                 max(1, int(round(2.0 / Shape.scale))),
                 Qt.DashLine,
             )
