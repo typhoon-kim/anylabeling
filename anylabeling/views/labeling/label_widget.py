@@ -438,10 +438,18 @@ class LabelingWidget(LabelDialog):
             self.tr("Start drawing linestrip. Ctrl+LeftClick ends creation."),
             enabled=False,
         )
+        edit_polygon_shortcut = shortcuts.get("edit_polygon", "Ctrl+J")
+        if isinstance(edit_polygon_shortcut, str):
+            if edit_polygon_shortcut != "E":
+                edit_polygon_shortcut = [edit_polygon_shortcut, "E"]
+        elif isinstance(edit_polygon_shortcut, list):
+            if "E" not in edit_polygon_shortcut:
+                edit_polygon_shortcut.append("E")
+
         edit_mode = create_action(
             self.tr("Edit Object"),
             self.set_edit_mode,
-            shortcuts["edit_polygon"],
+            edit_polygon_shortcut,
             "edit",
             self.tr("Move and edit the selected polygons"),
             enabled=False,
