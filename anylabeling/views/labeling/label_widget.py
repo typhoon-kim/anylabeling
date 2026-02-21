@@ -2034,8 +2034,11 @@ class LabelingWidget(LabelDialog):
         self.canvas.set_show_texts(enabled)
         save_config(self._config)
 
-    def on_new_brightness_contrast(self, qimage):
+    def on_new_brightness_contrast(self, qimage, darkness=None):
         self.canvas.load_pixmap(QtGui.QPixmap.fromImage(qimage), clear_shapes=False)
+        if darkness is not None:
+            self.canvas.background_darkness = darkness
+            self.canvas.update()
 
     def brightness_contrast(self, _):
         dialog = BrightnessContrastDialog(
@@ -2043,18 +2046,25 @@ class LabelingWidget(LabelDialog):
             self.on_new_brightness_contrast,
             parent=self,
         )
-        brightness, contrast = self.brightness_contrast_values.get(
-            self.filename, (None, None)
+        brightness, contrast, darkness = self.brightness_contrast_values.get(
+            self.filename, (None, None, None)
         )
         if brightness is not None:
             dialog.slider_brightness.setValue(brightness)
         if contrast is not None:
             dialog.slider_contrast.setValue(contrast)
+        if darkness is not None:
+            dialog.slider_darkness.setValue(darkness)
         dialog.exec_()
 
         brightness = dialog.slider_brightness.value()
         contrast = dialog.slider_contrast.value()
-        self.brightness_contrast_values[self.filename] = (brightness, contrast)
+        darkness = dialog.slider_darkness.value()
+        self.brightness_contrast_values[self.filename] = (
+            brightness,
+            contrast,
+            darkness,
+        )
 
     def toggle_polygons(self, value):
         for item in self.label_list:
@@ -2210,23 +2220,26 @@ class LabelingWidget(LabelDialog):
             self.on_new_brightness_contrast,
             parent=self,
         )
-        brightness, contrast = self.brightness_contrast_values.get(
-            self.filename, (None, None)
+        brightness, contrast, darkness = self.brightness_contrast_values.get(
+            self.filename, (None, None, None)
         )
         if self._config["keep_prev_brightness"] and self.recent_files:
-            brightness, _ = self.brightness_contrast_values.get(
-                self.recent_files[0], (None, None)
-            )
-        if self._config["keep_prev_contrast"] and self.recent_files:
-            _, contrast = self.brightness_contrast_values.get(
-                self.recent_files[0], (None, None)
+            brightness, contrast, darkness = self.brightness_contrast_values.get(
+                self.recent_files[0], (None, None, None)
             )
         if brightness is not None:
             dialog.slider_brightness.setValue(brightness)
         if contrast is not None:
             dialog.slider_contrast.setValue(contrast)
-        self.brightness_contrast_values[self.filename] = (brightness, contrast)
-        if brightness is not None or contrast is not None:
+        if darkness is not None:
+            dialog.slider_darkness.setValue(darkness)
+            self.canvas.background_darkness = darkness
+        self.brightness_contrast_values[self.filename] = (
+            brightness,
+            contrast,
+            darkness,
+        )
+        if brightness is not None or contrast is not None or darkness is not None:
             dialog.on_new_value(None)
         self.paint_canvas()
         self.add_recent_file(self.filename)

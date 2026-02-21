@@ -18,6 +18,8 @@ current_config_file = None
 
 
 def update_dict(target_dict, new_dict, validate_item=None):
+    if not isinstance(new_dict, dict):
+        return
     for key, value in new_dict.items():
         if validate_item:
             validate_item(key, value)

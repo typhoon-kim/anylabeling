@@ -98,6 +98,7 @@ class Canvas(QtWidgets.QWidget):  # pylint: disable=too-many-public-methods, too
         self.show_cross_line = True
         self.show_shape_groups = True
         self.show_texts = True
+        self.background_darkness = 0
 
         self.is_loading = False
         self.loading_text = self.tr("Loading...")
@@ -713,6 +714,13 @@ class Canvas(QtWidgets.QWidget):  # pylint: disable=too-many-public-methods, too
         p.translate(self.offset_to_center())
 
         p.drawPixmap(0, 0, self.pixmap)
+
+        # Draw background darkness
+        if self.background_darkness > 0:
+            p.setPen(Qt.NoPen)
+            p.setBrush(QtGui.QColor(0, 0, 0, self.background_darkness))
+            p.drawRect(self.pixmap.rect())
+
         Shape.scale = self.scale
 
         # Draw loading/waiting screen
